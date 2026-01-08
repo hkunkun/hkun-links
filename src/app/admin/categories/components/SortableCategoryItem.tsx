@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Category } from '@/types/database'
 import Image from 'next/image'
-import { GripVertical, Folder, ChevronDown, ChevronRight, Save, X, Plus } from 'lucide-react'
+import { GripVertical, Folder, ChevronDown, ChevronRight, Save, X, Plus, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { SortableLinkItem, LinkWithCounts } from './SortableLinkItem'
@@ -16,6 +16,8 @@ interface SortableCategoryItemProps {
     onDeleteLink: (linkId: string) => void
     onUpdateLink: (link: LinkWithCounts) => void
     onAddLink: () => void
+    onEditCategory?: (category: Category) => void
+    onDeleteCategory?: (categoryId: string) => void
 }
 
 export function SortableCategoryItem({
@@ -26,7 +28,9 @@ export function SortableCategoryItem({
     onUpdateCategory,
     onDeleteLink,
     onUpdateLink,
-    onAddLink
+    onAddLink,
+    onEditCategory,
+    onDeleteCategory
 }: SortableCategoryItemProps) {
     const {
         attributes,
@@ -35,27 +39,16 @@ export function SortableCategoryItem({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: category.id })
-
-    const [isEditing, setIsEditing] = useState(false)
-    const [editName, setEditName] = useState(category.name)
-    const [isSaving, setIsSaving] = useState(false)
+    } = useSortable({
+        id: category.id,
+        disabled: category.slug === 'uncategorized'
+    })
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
         marginBottom: '1rem',
-    }
-
-    const handleSave = async () => {
-        setIsSaving(true)
-        try {
-            await onUpdateCategory(category.id, { name: editName })
-            setIsEditing(false)
-        } finally {
-            setIsSaving(false)
-        }
     }
 
     return (
@@ -91,39 +84,36 @@ export function SortableCategoryItem({
                 </div>
 
                 <div className="flex gap-2">
-                    {/* Edit button could go here or implicitly by expanding */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onEditCategory?.(category)
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit Category"
+                    >
+                        <Pencil size={16} />
+                    </button>
+                    {category.slug !== 'uncategorized' && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onDeleteCategory?.(category.id)
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Category"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
 
             {/* Expanded Content */}
             {isOpen && (
                 <div style={{ padding: '1rem' }} className="animate-fadeIn">
-                    {/* Category Details Form */}
-                    <div style={{ padding: '1rem', marginBottom: '1.5rem', gap: '1rem' }} className="grid bg-gray-50 rounded-lg border border-gray-100">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
-                            <input
-                                type="text"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                                style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
-                                className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                        {/* Add Icon Picker here later */}
-                        <div className="flex justify-end gap-2">
-                            {editName !== category.name && (
-                                <button
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
-                                    className="flex items-center gap-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
-                                >
-                                    {isSaving ? 'Saving...' : 'Save Changes'}
-                                </button>
-                            )}
-                        </div>
-                    </div>
+
+                    {/* Links List header */}
 
                     {/* Links List header */}
                     <div className="flex items-center justify-between mb-4">

@@ -19,10 +19,11 @@ import {
 import { Category, Link, LinkInsert } from '@/types/database'
 import { LinkWithCounts } from './components/SortableLinkItem'
 import { SortableCategoryItem } from './components/SortableCategoryItem'
-import { createCategory, updateCategory, deleteCategory, reorderCategories, reorderLinks, createLink, updateLink, deleteLink } from '../actions'
+import { createCategory, updateCategory, deleteCategory, reorderCategories, reorderLinks, createLink, updateLink, deleteLink, deleteCategoryAndMoveLinks } from '../actions'
 import { Plus, Search } from 'lucide-react'
 import { LinkFormModal } from '../components/LinkFormModal'
 import { CategoryFormModal } from '../components/CategoryFormModal'
+import { ConfirmationModal } from '../components/ConfirmationModal'
 
 interface CategoriesManagerProps {
     initialCategories: (Category & { links: LinkWithCounts[] })[]
@@ -39,6 +40,8 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
     const [isSavingCategory, setIsSavingCategory] = useState(false)
+    const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null)
+    const [isDeletingCategory, setIsDeletingCategory] = useState(false)
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -98,6 +101,11 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
         }
     }
 
+    const handleEditCategory = (category: Category) => {
+        setEditingCategory(category)
+        setIsCategoryModalOpen(true)
+    }
+
     const handleCreateCategory = () => {
         setEditingCategory(null) // Only creating for now based on user request "fix Add Category button"
         setIsCategoryModalOpen(true)
@@ -128,6 +136,53 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
         const result = await updateCategory(id, updates)
         if (result.data) {
             setCategories(categories.map(c => c.id === id ? { ...c, ...updates } : c))
+        }
+    }
+
+    const handleDeleteCategory = (id: string) => {
+        setDeleteCategoryId(id)
+    }
+
+    const handleConfirmDeleteCategory = async () => {
+        if (!deleteCategoryId) return
+
+        setIsDeletingCategory(true)
+        try {
+            const linksToMove = categories.find(c => c.id === deleteCategoryId)?.links || []
+            const result = await deleteCategoryAndMoveLinks(deleteCategoryId)
+
+            if (result.success) {
+                const updatedUncategorized = result.uncategorizedCategory as Category
+
+                setCategories(prev => {
+                    const filtered = prev.filter(c => c.id !== deleteCategoryId)
+
+                    // Update links with new category_id
+                    const movedLinks = linksToMove.map(l => ({
+                        ...l,
+                        category_id: updatedUncategorized.id,
+                        updated_at: new Date().toISOString()
+                    }))
+
+                    const existingUncatIndex = filtered.findIndex(c => c.id === updatedUncategorized.id)
+
+                    if (existingUncatIndex !== -1) {
+                        const newCats = [...filtered]
+                        newCats[existingUncatIndex] = {
+                            ...newCats[existingUncatIndex],
+                            links: [...newCats[existingUncatIndex].links, ...movedLinks]
+                        }
+                        return newCats
+                    } else {
+                        return [...filtered, { ...updatedUncategorized, links: movedLinks }]
+                    }
+                })
+                setDeleteCategoryId(null)
+            } else {
+                alert(result.error || 'Failed to delete category')
+            }
+        } finally {
+            setIsDeletingCategory(false)
         }
     }
 
@@ -275,6 +330,8 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
                                 onDeleteLink={handleDeleteLink}
                                 onUpdateLink={handleUpdateLink}
                                 onAddLink={() => handleAddLink(category.id)}
+                                onEditCategory={handleEditCategory}
+                                onDeleteCategory={handleDeleteCategory}
                             />
                         ))}
                     </div>
@@ -304,6 +361,17 @@ export function CategoriesManager({ initialCategories }: CategoriesManagerProps)
                     onClose={() => { setIsCategoryModalOpen(false); setEditingCategory(null) }}
                     onSave={handleSaveCategory}
                     isLoading={isSavingCategory}
+                />
+            )}
+            {deleteCategoryId && (
+                <ConfirmationModal
+                    title="Delete Category"
+                    message="Are you sure you want to delete this category? All links within it will also be deleted. This action cannot be undone."
+                    onConfirm={handleConfirmDeleteCategory}
+                    onCancel={() => setDeleteCategoryId(null)}
+                    isLoading={isDeletingCategory}
+                    confirmText="Delete"
+                    variant="danger"
                 />
             )}
         </div>

@@ -94,6 +94,58 @@ export async function reorderCategories(orderedIds: string[]) {
     return { success: true }
 }
 
+export async function deleteCategoryAndMoveLinks(categoryId: string) {
+    const supabase = await createClient()
+
+    // 1. Find or Create 'uncategorized'
+    let { data: uncategorized, error: findError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('slug', 'uncategorized')
+        .single()
+
+    if (!uncategorized && !findError) {
+        // already found
+    } else if (!uncategorized) {
+        // Create it
+        const { data: maxOrder } = await supabase.from('categories').select('sort_order').order('sort_order', { ascending: false }).limit(1).single()
+        const newSortOrder = ((maxOrder?.sort_order || 0) + 1)
+
+        const { data: newCat, error: createError } = await supabase
+            .from('categories')
+            .insert({ name: 'Uncategorized', slug: 'uncategorized', icon: 'folder_off', sort_order: newSortOrder } as CategoryInsert)
+            .select()
+            .single()
+
+        if (createError) return { error: createError.message }
+        uncategorized = newCat
+    }
+
+    if (uncategorized.id === categoryId) {
+        return { error: "Cannot delete the Uncategorized category." }
+    }
+
+    // 2. Move links to 'uncategorized'
+    const { error: updateError } = await supabase
+        .from('links')
+        .update({ category_id: uncategorized.id, updated_at: new Date().toISOString() })
+        .eq('category_id', categoryId)
+
+    if (updateError) return { error: updateError.message }
+
+    // 3. Delete category
+    const { error: deleteError } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', categoryId)
+
+    if (deleteError) return { error: deleteError.message }
+
+    revalidatePath('/')
+    revalidatePath('/admin/categories')
+    return { success: true, uncategorizedCategory: uncategorized }
+}
+
 // ==================== LINKS ====================
 
 export async function createLink(data: LinkInsert) {
