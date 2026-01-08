@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
-import { AdminHeader } from '@/components/admin/AdminHeader'
+import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,16 +18,8 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="admin-container">
-            <AdminSidebar />
-            <main className="admin-main">
-                <AdminHeader user={user} />
-                <div className="admin-content">
-                    <div className="admin-content-inner">
-                        {children}
-                    </div>
-                </div>
-            </main>
-        </div>
+        <AdminLayoutClient user={user}>
+            {children}
+        </AdminLayoutClient>
     )
 }

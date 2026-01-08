@@ -4,13 +4,19 @@ import { User } from '@supabase/supabase-js'
 
 interface AdminHeaderProps {
     user: User
+    onMenuClick?: () => void
 }
 
-export function AdminHeader({ user }: AdminHeaderProps) {
+export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
     return (
         <header className="admin-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {/* Mobile menu button would go here */}
+                <button
+                    onClick={onMenuClick}
+                    className="admin-mobile-toggle"
+                >
+                    <span className="material-symbols-outlined">menu</span>
+                </button>
                 <h2 className="admin-header-title">Dashboard</h2>
             </div>
 

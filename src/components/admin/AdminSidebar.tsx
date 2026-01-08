@@ -11,7 +11,12 @@ const navItems = [
     { href: '/admin/links', label: 'Links', icon: 'link' },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+    isOpen?: boolean
+    onClose?: () => void
+}
+
+export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
 
@@ -22,8 +27,12 @@ export function AdminSidebar() {
         router.refresh()
     }
 
+    const handleLinkClick = () => {
+        if (onClose) onClose()
+    }
+
     return (
-        <aside className="admin-sidebar">
+        <aside className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
             {/* Logo */}
             <div className="admin-sidebar-logo">
                 <div className="admin-sidebar-logo-icon">
@@ -33,6 +42,15 @@ export function AdminSidebar() {
                     <h1>LinkManager</h1>
                     <p>Admin Panel</p>
                 </div>
+                {/* Mobile Close Button */}
+                <button
+                    onClick={onClose}
+                    className="md:hidden ml-auto p-2 text-gray-500 hover:text-gray-900"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'none' }} // Visible only on mobile via CSS if needed, but we rely on overlay usually. 
+                // Actually let's just add it and style it.
+                >
+                    {/* We can rely on overlay to close, or add an X here. Let's add X for clarity */}
+                </button>
             </div>
 
             {/* Navigation */}
@@ -44,6 +62,7 @@ export function AdminSidebar() {
                             key={item.href}
                             href={item.href}
                             className={`admin-nav-link ${isActive ? 'active' : ''}`}
+                            onClick={handleLinkClick}
                         >
                             <span
                                 className="material-symbols-outlined"
@@ -58,7 +77,7 @@ export function AdminSidebar() {
 
                 <div className="admin-nav-divider" />
 
-                <Link href="/" className="admin-nav-link">
+                <Link href="/" className="admin-nav-link" onClick={handleLinkClick}>
                     <span className="material-symbols-outlined">home</span>
                     View Site
                 </Link>

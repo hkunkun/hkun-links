@@ -49,7 +49,7 @@ export function LinkCard({ link }: LinkCardProps) {
             </div>
             <div className="link-card-content">
                 <div className="link-card-title">{link.title}</div>
-                <div className="link-card-domain hidden md:block">{getDomain(link.url)}</div>
+                <div className="link-card-domain hidden md:block">{link.description || getDomain(link.url)}</div>
             </div>
             {link.is_favorite && (
                 <span className="material-symbols-outlined icon-filled" style={{ color: '#f59e0b' }}>star</span>

@@ -1,9 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import type { Category } from '@/types/database'
-import { createCategory, updateCategory, deleteCategory, reorderCategories } from '../actions'
 import {
     DndContext,
     closestCenter,
@@ -17,399 +14,298 @@ import {
     arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import { Category, Link, LinkInsert } from '@/types/database'
+import { LinkWithCounts } from './components/SortableLinkItem'
+import { SortableCategoryItem } from './components/SortableCategoryItem'
+import { createCategory, updateCategory, deleteCategory, reorderCategories, reorderLinks, createLink, updateLink, deleteLink } from '../actions'
+import { Plus, Search } from 'lucide-react'
+import { LinkFormModal } from '../components/LinkFormModal'
+import { CategoryFormModal } from '../components/CategoryFormModal'
 
-interface CategoryWithCount extends Category {
-    linkCount: number
+interface CategoriesManagerProps {
+    initialCategories: (Category & { links: LinkWithCounts[] })[]
 }
 
-// Background colors for category icons
-const iconBgColors = ['#e0f2fe', '#fef3c7', '#f3e8ff', '#dcfce7', '#fce7f3', '#dbeafe']
-
-function SortableCategoryItem({
-    category,
-    index,
-    onEdit,
-    onDelete
-}: {
-    category: CategoryWithCount
-    index: number
-    onEdit: (category: Category) => void
-    onDelete: (id: string) => void
-}) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: category.id })
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-    }
-
-    const bgColor = iconBgColors[index % iconBgColors.length]
-
-    return (
-        <div ref={setNodeRef} style={style} className="category-item">
-            {/* Drag handle */}
-            <button
-                {...attributes}
-                {...listeners}
-                className="category-drag-handle"
-            >
-                <span className="material-symbols-outlined">drag_indicator</span>
-            </button>
-
-            {/* Icon */}
-            <div className="category-icon" style={{ backgroundColor: bgColor }}>
-                {/\p{Emoji}/u.test(category.icon) ? (
-                    <span style={{ fontSize: '1.5rem' }}>{category.icon}</span>
-                ) : (
-                    <span className="material-symbols-outlined">{category.icon}</span>
-                )}
-            </div>
-
-            {/* Name */}
-            <div className="category-info">
-                <p className="category-name">{category.name}</p>
-                <p className="category-count-mobile">{category.linkCount} links</p>
-            </div>
-
-            {/* Link count (desktop) */}
-            <div className="category-count">
-                <span className="category-count-badge">{category.linkCount} links</span>
-            </div>
-
-            {/* Actions */}
-            <div className="category-actions">
-                <button
-                    onClick={() => onEdit(category)}
-                    className="category-action-btn edit"
-                    title="Edit"
-                >
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
-                </button>
-                <button
-                    onClick={() => onDelete(category.id)}
-                    className="category-action-btn delete"
-                    title="Delete"
-                >
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
-                </button>
-            </div>
-        </div>
-    )
-}
-
-function CategoryFormModal({
-    category,
-    onClose,
-    onSave,
-    isLoading
-}: {
-    category?: Category | null
-    onClose: () => void
-    onSave: (data: { name: string; slug: string; icon: string }) => void
-    isLoading: boolean
-}) {
-    const [name, setName] = useState(category?.name || '')
-    const [slug, setSlug] = useState(category?.slug || '')
-    const [icon, setIcon] = useState(category?.icon || '📁')
-
-    const handleNameChange = (value: string) => {
-        setName(value)
-        if (!category) {
-            setSlug(value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
-        }
-    }
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        onSave({ name, slug, icon })
-    }
-
-    const commonIcons = ['📁', '🔗', '💼', '🎮', '📱', '💻', '🎨', '📚', '🎵', '🎬', '🛒', '✈️', '🍔', '💰']
-
-    return (
-        <div className="modal-overlay">
-            <div className="modal-backdrop" onClick={onClose} />
-            <div className="modal-content">
-                <div className="modal-header">
-                    <h2 className="modal-title">
-                        {category ? 'Edit Category' : 'New Category'}
-                    </h2>
-                    <button onClick={onClose} className="modal-close">
-                        <span className="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="modal-form">
-                    <div className="form-group">
-                        <label className="form-label">Icon</label>
-                        <div className="icon-picker">
-                            {commonIcons.map((emoji) => (
-                                <button
-                                    key={emoji}
-                                    type="button"
-                                    onClick={() => setIcon(emoji)}
-                                    className={`icon-picker-item ${icon === emoji ? 'selected' : ''}`}
-                                >
-                                    {emoji}
-                                </button>
-                            ))}
-                        </div>
-                        <input
-                            type="text"
-                            value={icon}
-                            onChange={(e) => setIcon(e.target.value)}
-                            placeholder="Or enter emoji/icon name"
-                            className="form-input"
-                            style={{ marginTop: '0.5rem' }}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => handleNameChange(e.target.value)}
-                            placeholder="Category name"
-                            required
-                            className="form-input"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Slug (URL path)</label>
-                        <input
-                            type="text"
-                            value={slug}
-                            onChange={(e) => setSlug(e.target.value)}
-                            placeholder="category-slug"
-                            required
-                            pattern="[a-z0-9-]+"
-                            className="form-input"
-                        />
-                    </div>
-
-                    <div className="modal-actions">
-                        <button type="button" onClick={onClose} className="admin-btn admin-btn-secondary">
-                            Cancel
-                        </button>
-                        <button type="submit" className="admin-btn admin-btn-primary" disabled={isLoading}>
-                            {isLoading ? 'Saving...' : (category ? 'Update' : 'Create')}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
-
-export function CategoriesManager({ initialCategories }: { initialCategories: CategoryWithCount[] }) {
+export function CategoriesManager({ initialCategories }: CategoriesManagerProps) {
     const [categories, setCategories] = useState(initialCategories)
+    const [openCategoryIds, setOpenCategoryIds] = useState<Set<string>>(new Set())
     const [searchQuery, setSearchQuery] = useState('')
+    const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
+    const [editingLink, setEditingLink] = useState<LinkWithCounts | null>(null)
+    const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
+    const [isSavingLink, setIsSavingLink] = useState(false)
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-    const router = useRouter()
-    const searchParams = useSearchParams()
-
-    // Check for action=new in URL
-    useState(() => {
-        if (searchParams.get('action') === 'new') {
-            setIsModalOpen(true)
-        }
-    })
+    const [isSavingCategory, setIsSavingCategory] = useState(false)
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     )
 
-    const filteredCategories = categories.filter(cat =>
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const handleToggleCategory = (id: string) => {
+        setOpenCategoryIds(prev => {
+            const next = new Set(prev)
+            if (next.has(id)) next.delete(id)
+            else next.add(id)
+            return next
+        })
+    }
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event
 
-        if (over && active.id !== over.id) {
-            const oldIndex = categories.findIndex((cat) => cat.id === active.id)
-            const newIndex = categories.findIndex((cat) => cat.id === over.id)
+        if (!over) return
 
-            const newOrder = arrayMove(categories, oldIndex, newIndex)
-            setCategories(newOrder)
+        if (active.id !== over.id) {
+            // Check if we are sorting categories
+            const activeCategoryIndex = categories.findIndex(c => c.id === active.id)
+            const overCategoryIndex = categories.findIndex(c => c.id === over.id)
 
-            await reorderCategories(newOrder.map((cat) => cat.id))
+            if (activeCategoryIndex !== -1 && overCategoryIndex !== -1) {
+                // Sorting Categories
+                const newCategories = arrayMove(categories, activeCategoryIndex, overCategoryIndex)
+                setCategories(newCategories)
+                await reorderCategories(newCategories.map(c => c.id))
+                return
+            }
+
+            // Check if sorting links within a category (assuming single list sorting for now)
+            // This requires finding which category contains the active link
+            const categoryWithLink = categories.find(c => c.links.some(l => l.id === active.id))
+            if (categoryWithLink) {
+                const oldIndex = categoryWithLink.links.findIndex(l => l.id === active.id)
+                const newIndex = categoryWithLink.links.findIndex(l => l.id === over.id)
+
+                if (oldIndex !== -1 && newIndex !== -1) {
+                    const newLinks = arrayMove(categoryWithLink.links, oldIndex, newIndex)
+                    // Update state
+                    setCategories(categories.map(c =>
+                        c.id === categoryWithLink.id ? { ...c, links: newLinks } : c
+                    ))
+                    // API call
+                    await reorderLinks(categoryWithLink.id, newLinks.map(l => l.id))
+                }
+            }
         }
     }
 
-    const handleSave = async (data: { name: string; slug: string; icon: string }) => {
-        setIsLoading(true)
+    const handleCreateCategory = () => {
+        setEditingCategory(null) // Only creating for now based on user request "fix Add Category button"
+        setIsCategoryModalOpen(true)
+    }
 
+    const handleSaveCategory = async (data: Partial<Category>) => {
+        setIsSavingCategory(true)
         try {
             if (editingCategory) {
                 const result = await updateCategory(editingCategory.id, data)
-                if (result.error) {
-                    alert(result.error)
-                    return
+                if (result.data) {
+                    setCategories(prev => prev.map(c => c.id === editingCategory.id ? { ...c, ...result.data } : c))
                 }
             } else {
-                const result = await createCategory(data)
+                const result = await createCategory(data as any)
+                if (result.data) {
+                    setCategories([...categories, { ...result.data, links: [] as LinkWithCounts[] }])
+                }
+            }
+            setIsCategoryModalOpen(false)
+            setEditingCategory(null)
+        } finally {
+            setIsSavingCategory(false)
+        }
+    }
+
+    const handleUpdateCategory = async (id: string, updates: Partial<Category>) => {
+        const result = await updateCategory(id, updates)
+        if (result.data) {
+            setCategories(categories.map(c => c.id === id ? { ...c, ...updates } : c))
+        }
+    }
+
+    const handleUpdateLink = (link: LinkWithCounts) => {
+        setEditingLink(link)
+        setIsLinkModalOpen(true)
+    }
+
+    const handleDeleteLink = async (linkId: string) => {
+        if (!confirm("Are you sure you want to delete this link?")) return
+        const result = await deleteLink(linkId)
+        if (result.success) {
+            setCategories(prev => prev.map(c => ({
+                ...c,
+                links: c.links.filter(l => l.id !== linkId)
+            })))
+        }
+    }
+
+    const handleAddLink = (categoryId: string) => {
+        setEditingLink(null)
+        setActiveCategoryId(categoryId)
+        setIsLinkModalOpen(true)
+    }
+
+    const handleSaveLink = async (data: LinkInsert) => {
+        setIsSavingLink(true)
+        try {
+            if (editingLink) {
+                const isCategoryChanged = data.category_id !== editingLink.category_id
+                const result = await updateLink(editingLink.id, data)
+
                 if (result.error) {
                     alert(result.error)
                     return
                 }
+
+                if (result.data) {
+                    setCategories(prev => {
+                        let newCategories = [...prev]
+                        if (isCategoryChanged) {
+                            newCategories = newCategories.map(c =>
+                                c.id === editingLink.category_id
+                                    ? { ...c, links: c.links.filter(l => l.id !== editingLink.id) }
+                                    : c
+                            )
+                            newCategories = newCategories.map(c =>
+                                c.id === data.category_id
+                                    ? { ...c, links: [...c.links, { ...editingLink, ...result.data }] }
+                                    : c
+                            )
+                        } else {
+                            newCategories = newCategories.map(c =>
+                                c.id === editingLink.category_id
+                                    ? { ...c, links: c.links.map(l => l.id === editingLink.id ? { ...l, ...result.data } : l) }
+                                    : c
+                            )
+                        }
+                        return newCategories
+                    })
+                }
+            } else {
+                if (!data.category_id && activeCategoryId) data.category_id = activeCategoryId
+
+                const result = await createLink(data)
+                if (result.error) {
+                    alert(result.error)
+                    return
+                }
+
+                if (result.data) {
+                    setCategories(prev => prev.map(c =>
+                        c.id === result.data.category_id
+                            ? { ...c, links: [...c.links, { ...result.data, click_count: 0 }] }
+                            : c
+                    ))
+                }
             }
-
-            setIsModalOpen(false)
-            setEditingCategory(null)
-            router.refresh()
+            setIsLinkModalOpen(false)
+            setEditingLink(null)
+            setActiveCategoryId(null)
         } finally {
-            setIsLoading(false)
+            setIsSavingLink(false)
         }
     }
 
-    const handleDelete = async (id: string) => {
-        if (deleteConfirm !== id) {
-            setDeleteConfirm(id)
-            return
-        }
-
-        const result = await deleteCategory(id)
-        if (result.error) {
-            alert(result.error)
-            return
-        }
-
-        setCategories((prev) => prev.filter((cat) => cat.id !== id))
-        setDeleteConfirm(null)
-    }
-
-    const openEditModal = (category: Category) => {
-        setEditingCategory(category)
-        setIsModalOpen(true)
-    }
-
-    const openNewModal = () => {
-        setEditingCategory(null)
-        setIsModalOpen(true)
-    }
+    const filteredCategories = categories.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
     return (
-        <>
+        <div className="admin-content-inner">
             {/* Page Header */}
             <div className="admin-page-header">
                 <div>
                     <h1 className="admin-page-title">Category Management</h1>
-                    <p className="admin-page-subtitle">
-                        Organize your links by grouping them into categories. Drag to reorder display order.
-                    </p>
+                    <p className="admin-page-subtitle">Organize your links by grouping them into categories. Drag to reorder.</p>
                 </div>
                 <div className="admin-page-actions">
-                    <button onClick={openNewModal} className="admin-btn admin-btn-primary">
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
+                    <button
+                        onClick={handleCreateCategory}
+                        className="admin-btn admin-btn-primary"
+                    >
+                        <Plus size={20} />
                         Add Category
                     </button>
                 </div>
             </div>
 
             {/* Search */}
-            <div className="category-search">
-                <span className="category-search-icon">
-                    <span className="material-symbols-outlined">search</span>
-                </span>
-                <input
-                    type="text"
-                    placeholder="Search categories..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="category-search-input"
-                />
+            <div className="filter-card">
+                <div className="filter-search">
+                    <span className="filter-search-icon">
+                        <Search size={20} />
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Search categories..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="filter-search-input"
+                    />
+                </div>
             </div>
 
-            {/* Category List */}
-            {filteredCategories.length > 0 ? (
-                <>
-                    {/* Header row */}
-                    <div className="category-list-header">
-                        <div style={{ width: '2.5rem' }}></div>
-                        <div style={{ flex: 1 }}>Category Name</div>
-                        <div style={{ width: '8rem', textAlign: 'right' }}>Link Count</div>
-                        <div style={{ width: '6rem', textAlign: 'right' }}>Actions</div>
+            {/* List */}
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={filteredCategories.map(c => c.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div className="space-y-4">
+                        {filteredCategories.map(category => (
+                            <SortableCategoryItem
+                                key={category.id}
+                                category={category}
+                                links={category.links}
+                                isOpen={openCategoryIds.has(category.id)}
+                                onToggle={() => handleToggleCategory(category.id)}
+                                onUpdateCategory={handleUpdateCategory}
+                                onDeleteLink={handleDeleteLink}
+                                onUpdateLink={handleUpdateLink}
+                                onAddLink={() => handleAddLink(category.id)}
+                            />
+                        ))}
                     </div>
+                </SortableContext>
+            </DndContext>
 
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                        <SortableContext items={filteredCategories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                            <div className="category-list">
-                                {filteredCategories.map((category, index) => (
-                                    <SortableCategoryItem
-                                        key={category.id}
-                                        category={category}
-                                        index={index}
-                                        onEdit={openEditModal}
-                                        onDelete={handleDelete}
-                                    />
-                                ))}
-                            </div>
-                        </SortableContext>
-                    </DndContext>
-
-                    <div className="category-list-footer">
-                        <p>Showing {filteredCategories.length} categories</p>
-                    </div>
-                </>
-            ) : (
-                <div className="empty-state">
-                    <span className="material-symbols-outlined empty-state-icon">folder_open</span>
-                    <h3 className="empty-state-title">No categories yet</h3>
-                    <p className="empty-state-description">Create your first category to start organizing links</p>
-                    <button onClick={openNewModal} className="admin-btn admin-btn-primary" style={{ marginTop: '1.5rem' }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
-                        Create Category
-                    </button>
+            {filteredCategories.length === 0 && (
+                <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-200">
+                    No categories found
                 </div>
             )}
 
-            {/* Delete confirmation */}
-            {deleteConfirm && (
-                <div className="delete-confirm-toast">
-                    <p>Delete this category?</p>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button onClick={() => setDeleteConfirm(null)} className="admin-btn admin-btn-secondary" style={{ padding: '0.5rem 1rem' }}>
-                            Cancel
-                        </button>
-                        <button onClick={() => handleDelete(deleteConfirm)} className="admin-btn" style={{ padding: '0.5rem 1rem', background: '#ef4444', color: 'white' }}>
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {isModalOpen && (
-                <CategoryFormModal
-                    category={editingCategory}
-                    onClose={() => {
-                        setIsModalOpen(false)
-                        setEditingCategory(null)
-                    }}
-                    onSave={handleSave}
-                    isLoading={isLoading}
+            {isLinkModalOpen && (
+                <LinkFormModal
+                    link={editingLink}
+                    categories={categories.map(c => ({ id: c.id, name: c.name, slug: c.slug }))}
+                    onClose={() => { setIsLinkModalOpen(false); setEditingLink(null); setActiveCategoryId(null) }}
+                    onSave={handleSaveLink}
+                    isLoading={isSavingLink}
+                    activeCategoryId={activeCategoryId || undefined}
                 />
             )}
-        </>
+
+            {isCategoryModalOpen && (
+                <CategoryFormModal
+                    category={editingCategory}
+                    onClose={() => { setIsCategoryModalOpen(false); setEditingCategory(null) }}
+                    onSave={handleSaveCategory}
+                    isLoading={isSavingCategory}
+                />
+            )}
+        </div>
     )
 }

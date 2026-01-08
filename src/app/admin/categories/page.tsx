@@ -8,17 +8,28 @@ export default async function CategoriesPage() {
 
     const { data: categories } = await supabase
         .from('categories')
-        .select('*, links(count)')
+        .select(`
+            *,
+            links (
+                *,
+                click_events (count)
+            )
+        `)
         .order('sort_order', { ascending: true })
 
-    const categoriesWithCounts = categories?.map((cat) => ({
+    const categoriesWithData = categories?.map((cat: any) => ({
         ...cat,
-        linkCount: Array.isArray(cat.links) ? cat.links.length : (cat.links as { count: number })?.count || 0,
+        links: Array.isArray(cat.links)
+            ? cat.links.map((link: any) => ({
+                ...link,
+                click_count: link.click_events?.[0]?.count || 0
+            })).sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+            : []
     })) || []
 
     return (
         <div className="pt-4">
-            <CategoriesManager initialCategories={categoriesWithCounts} />
+            <CategoriesManager initialCategories={categoriesWithData} />
         </div>
     )
 }

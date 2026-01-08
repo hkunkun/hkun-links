@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Manrope } from "next/font/google"
 import "./globals.css"
+import "./globals-utilities.css"
 import { ThemeProvider } from "@/components/providers/ThemeProvider"
 
 const manrope = Manrope({

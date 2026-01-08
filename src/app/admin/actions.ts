@@ -121,7 +121,9 @@ export async function createLink(data: LinkInsert) {
     }
 
     revalidatePath('/')
+    revalidatePath('/')
     revalidatePath('/admin/links')
+    revalidatePath('/admin/categories')
     return { data: link }
 }
 
@@ -140,7 +142,9 @@ export async function updateLink(id: string, data: LinkUpdate) {
     }
 
     revalidatePath('/')
+    revalidatePath('/')
     revalidatePath('/admin/links')
+    revalidatePath('/admin/categories')
     return { data: link }
 }
 
@@ -157,7 +161,9 @@ export async function deleteLink(id: string) {
     }
 
     revalidatePath('/')
+    revalidatePath('/')
     revalidatePath('/admin/links')
+    revalidatePath('/admin/categories')
     return { success: true }
 }
 
@@ -174,7 +180,9 @@ export async function deleteLinks(ids: string[]) {
     }
 
     revalidatePath('/')
+    revalidatePath('/')
     revalidatePath('/admin/links')
+    revalidatePath('/admin/categories')
     return { success: true }
 }
 
@@ -197,6 +205,7 @@ export async function reorderLinks(categoryId: string, orderedIds: string[]) {
     revalidatePath('/')
     revalidatePath(`/category/${categoryId}`)
     revalidatePath('/admin/links')
+    revalidatePath('/admin/categories')
     return { success: true }
 }
 
