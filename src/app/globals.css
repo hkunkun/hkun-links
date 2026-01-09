@@ -664,7 +664,7 @@ body {
   z-index: 20;
 }
 
-.dark .admin-header {
+html:not(.light) .admin-header {
   background: rgba(15, 23, 42, 0.9);
   border-bottom-color: var(--color-border);
 }

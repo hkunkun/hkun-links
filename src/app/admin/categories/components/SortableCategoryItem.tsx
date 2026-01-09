@@ -52,13 +52,13 @@ export function SortableCategoryItem({
     }
 
     return (
-        <div ref={setNodeRef} style={style} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-colors">
+        <div ref={setNodeRef} style={style} className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden transition-colors">
             {/* Header / Drag Handle */}
-            <div style={{ padding: '1rem', gap: '0.75rem' }} className={`flex items-center transition-colors ${isOpen ? 'bg-gray-50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-gray-700' : ''}`}>
+            <div style={{ padding: '1rem', gap: '0.75rem' }} className={`flex items-center transition-colors ${isOpen ? 'bg-[var(--color-surface-hover)] border-b border-[var(--color-border)]' : ''}`}>
                 <button
                     {...attributes}
                     {...listeners}
-                    className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 touch-none"
+                    className="cursor-grab text-[var(--color-text-muted)] hover:text-[var(--color-text)] touch-none"
                 >
                     <GripVertical size={20} />
                 </button>
@@ -66,20 +66,20 @@ export function SortableCategoryItem({
                 <button
                     onClick={onToggle}
                     style={{ padding: '0.25rem' }}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded hover:bg-[var(--color-surface-hover)]"
                 >
                     {isOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                 </button>
 
-                <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 flex items-center justify-center text-xl shrink-0 border border-blue-100 dark:border-blue-800/30">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center text-xl shrink-0 border border-[var(--color-primary)]/20">
                     {category.icon === 'folder' || !category.icon ? <Folder size={20} /> : <span>{category.icon}</span>}
                 </div>
 
-                <div className="flex-1 font-medium text-gray-900 dark:text-gray-100 text-lg min-w-0 truncate">
+                <div className="flex-1 font-medium text-[var(--color-text)] text-lg min-w-0 truncate">
                     {category.name}
                 </div>
 
-                <div style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.25rem', paddingBottom: '0.25rem' }} className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap shrink-0">
+                <div style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.25rem', paddingBottom: '0.25rem' }} className="text-sm bg-[var(--color-surface-elevated)] text-[var(--color-text-secondary)] font-medium whitespace-nowrap shrink-0">
                     {links.length} links
                 </div>
 
@@ -89,7 +89,7 @@ export function SortableCategoryItem({
                             e.stopPropagation()
                             onEditCategory?.(category)
                         }}
-                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                        className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-colors"
                         title="Edit Category"
                     >
                         <Pencil size={16} />
@@ -100,7 +100,7 @@ export function SortableCategoryItem({
                                 e.stopPropagation()
                                 onDeleteCategory?.(category.id)
                             }}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                            className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 rounded-lg transition-colors"
                             title="Delete Category"
                         >
                             <Trash2 size={16} />
@@ -115,12 +115,12 @@ export function SortableCategoryItem({
 
                     {/* Links List header */}
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-blue-500" style={{ fontSize: 20 }}>link</span>
+                        <h4 className="font-medium text-[var(--color-text)] flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[var(--color-primary)]" style={{ fontSize: 20 }}>link</span>
                             Links ({links.length})
                         </h4>
                         <div className="flex gap-2">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Drag to reorder</span>
+                            <span className="text-sm text-[var(--color-text-secondary)]">Drag to reorder</span>
                         </div>
                     </div>
 
@@ -138,7 +138,7 @@ export function SortableCategoryItem({
                         </SortableContext>
 
                         {links.length === 0 && (
-                            <div className="text-center py-8 text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-slate-900/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                            <div className="text-center py-8 text-[var(--color-text-muted)] bg-[var(--color-surface-elevated)]/50 rounded-lg border border-dashed border-[var(--color-border)]">
                                 No links in this category
                             </div>
                         )}
@@ -154,7 +154,7 @@ export function SortableCategoryItem({
                                 gap: '0.5rem',
                                 marginTop: '0.5rem'
                             }}
-                            className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg border border-dashed border-blue-200 dark:border-blue-800 hover:border-blue-300 transition-colors"
+                            className="text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg border border-dashed border-[var(--color-primary)]/30 hover:border-[var(--color-primary)] transition-colors"
                             onClick={onAddLink}
                         >
                             <Plus size={18} />
