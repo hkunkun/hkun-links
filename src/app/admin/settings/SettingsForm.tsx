@@ -28,7 +28,7 @@ export function SettingsForm({ initialConfig }: SettingsFormProps) {
             if (result.success) {
                 setMessage('Settings updated successfully!')
             } else {
-                setMessage('Failed to update settings.')
+                setMessage(result.error || 'Failed to update settings.')
             }
         } catch (error) {
             setMessage('An error occurred.')
