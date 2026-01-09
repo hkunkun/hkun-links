@@ -40,7 +40,7 @@ export function SettingsForm({ initialConfig }: SettingsFormProps) {
     return (
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="space-y-6 max-w-2xl">
-                <div>
+                <div className="form-group">
                     <label className="form-label">Site Title</label>
                     <input
                         type="text"
@@ -52,7 +52,7 @@ export function SettingsForm({ initialConfig }: SettingsFormProps) {
                     />
                 </div>
 
-                <div>
+                <div className="form-group">
                     <label className="form-label">Logo URL</label>
                     <div className="flex gap-4 items-center">
                         <input
@@ -72,7 +72,7 @@ export function SettingsForm({ initialConfig }: SettingsFormProps) {
                     <p className="text-xs text-gray-500 mt-1">URL to your logo image. Leave empty to use text.</p>
                 </div>
 
-                <div>
+                <div className="form-group">
                     <label className="form-label">Favicon URL</label>
                     <div className="flex gap-4 items-center">
                         <input

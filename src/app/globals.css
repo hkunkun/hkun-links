@@ -2195,7 +2195,7 @@ body {
   pointer-events: none;
 }
 
-.form-input {
+.form-input-wrapper .form-input {
   width: 100%;
   height: 3rem;
   padding-left: 3rem;
