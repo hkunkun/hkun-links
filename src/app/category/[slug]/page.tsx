@@ -82,17 +82,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                         <p className="category-stats">
                             Showing {links?.length || 0} links in <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>{category.name}</span>
                         </p>
-                        <div className="category-search">
-                            <div className="category-search-icon">
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>search</span>
-                            </div>
-                            <input
-                                className="category-search-input"
-                                placeholder="Filter links in this folder..."
-                                type="text"
-                                aria-label="Filter links"
-                            />
-                        </div>
                     </div>
 
                     {links && links.length > 0 ? (

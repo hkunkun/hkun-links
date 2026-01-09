@@ -63,15 +63,18 @@ export default async function HomePage() {
                   return null
                 }
 
+                const displayedLinks = isLoggedIn ? categoryLinks : categoryLinks.slice(0, 4)
+
                 return (
                   <section key={category.id} className="category-section">
                     <CategorySectionHeader
                       category={category}
                       linkCount={categoryLinks.length}
+                      hideViewAll={isLoggedIn}
                     />
                     {categoryLinks.length > 0 ? (
                       <div className="links-grid">
-                        {categoryLinks.slice(0, 4).map((link) => (
+                        {displayedLinks.map((link) => (
                           <LinkCard key={link.id} link={link} />
                         ))}
                       </div>

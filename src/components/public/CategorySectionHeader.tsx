@@ -6,9 +6,10 @@ import Link from 'next/link'
 interface CategorySectionHeaderProps {
     category: Category
     linkCount: number
+    hideViewAll?: boolean
 }
 
-export function CategorySectionHeader({ category, linkCount }: CategorySectionHeaderProps) {
+export function CategorySectionHeader({ category, linkCount, hideViewAll }: CategorySectionHeaderProps) {
     const isEmoji = category.icon.length <= 2 || /^\p{Emoji}/u.test(category.icon)
 
     return (
@@ -23,9 +24,11 @@ export function CategorySectionHeader({ category, linkCount }: CategorySectionHe
                 )}
                 {category.name}
             </h3>
-            <Link href={`/category/${category.slug}`} className="category-view-all">
-                View All
-            </Link>
+            {!hideViewAll && (
+                <Link href={`/category/${category.slug}`} className="category-view-all">
+                    View All
+                </Link>
+            )}
         </div>
     )
 }
