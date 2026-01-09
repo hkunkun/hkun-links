@@ -2632,3 +2632,18 @@ body {
 .space-y-4>*+* {
   margin-top: 1rem !important;
 }
+/* Settings Page Form (Manual Override) */
+.settings-form-card {
+  background-color: var(--color-surface); /* Dark mode compatible */
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 42rem; /* max-w-2xl */
+}

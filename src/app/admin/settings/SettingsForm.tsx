@@ -38,8 +38,8 @@ export function SettingsForm({ initialConfig }: SettingsFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="space-y-6 max-w-2xl">
+        <form onSubmit={handleSubmit} className="settings-form-card">
+            <div className="settings-form-container">
                 <div className="form-group">
                     <label className="form-label">Site Title</label>
                     <input
