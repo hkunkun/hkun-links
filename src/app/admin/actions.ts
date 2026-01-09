@@ -327,3 +327,38 @@ export async function importData(data: { categories: CategoryInsert[]; links: Li
     revalidatePath('/admin')
     return { success: true }
 }
+
+// ==================== SITE CONFIG ====================
+
+export async function getSiteConfig() {
+    const supabase = await createClient()
+    const { data, error } = await supabase.from('site_config').select('*')
+
+    if (error) {
+        console.error('Error fetching site config:', error)
+        return {}
+    }
+
+    // Reduce to object
+    const config = (data || []).reduce((acc: Record<string, string>, curr: { key: string, value: string }) => {
+        acc[curr.key] = curr.value
+        return acc
+    }, {} as Record<string, string>)
+
+    return config
+}
+
+export async function updateSiteConfig(updates: Record<string, string>) {
+    const supabase = await createClient()
+
+    // Upsert each key
+    const upserts = Object.entries(updates).map(([key, value]) => ({ key, value }))
+
+    const { error } = await supabase.from('site_config').upsert(upserts)
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/')
+    revalidatePath('/admin')
+    return { success: true }
+}

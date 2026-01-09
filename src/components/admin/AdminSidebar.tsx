@@ -9,16 +9,19 @@ const navItems = [
     { href: '/admin', label: 'Dashboard', icon: 'pie_chart' },
     { href: '/admin/categories', label: 'Categories', icon: 'folder_open' },
     { href: '/admin/links', label: 'Links', icon: 'link' },
+    { href: '/admin/settings', label: 'Settings', icon: 'settings' },
 ]
 
 interface AdminSidebarProps {
     isOpen?: boolean
     onClose?: () => void
+    config?: Record<string, string>
 }
 
-export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ isOpen, onClose, config = {} }: AdminSidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
+    const { site_title, logo_url } = config
 
     const handleLogout = async () => {
         const supabase = createClient()
@@ -35,11 +38,17 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         <aside className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
             {/* Logo */}
             <div className="admin-sidebar-logo">
-                <div className="admin-sidebar-logo-icon">
-                    <span className="material-symbols-outlined">link</span>
-                </div>
+                {logo_url ? (
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 overflow-hidden shrink-0">
+                        <img src={logo_url} alt="Logo" className="h-full w-full object-contain" />
+                    </div>
+                ) : (
+                    <div className="admin-sidebar-logo-icon">
+                        <span className="material-symbols-outlined">link</span>
+                    </div>
+                )}
                 <div className="admin-sidebar-logo-text">
-                    <h1>LinkManager</h1>
+                    <h1>{site_title || 'LinkManager'}</h1>
                     <p>Admin Panel</p>
                 </div>
                 {/* Mobile Close Button */}

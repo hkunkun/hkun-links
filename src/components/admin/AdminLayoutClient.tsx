@@ -8,9 +8,10 @@ import type { User } from '@supabase/supabase-js'
 interface AdminLayoutClientProps {
     children: React.ReactNode
     user: User
+    config: Record<string, string>
 }
 
-export function AdminLayoutClient({ children, user }: AdminLayoutClientProps) {
+export function AdminLayoutClient({ children, user, config }: AdminLayoutClientProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     return (
@@ -26,6 +27,7 @@ export function AdminLayoutClient({ children, user }: AdminLayoutClientProps) {
             <AdminSidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                config={config}
             />
 
             <main className="admin-main">

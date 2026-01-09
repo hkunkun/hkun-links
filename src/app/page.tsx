@@ -7,10 +7,13 @@ import { FloatingActionButton } from '@/components/public/FloatingActionButton'
 import { Footer } from '@/components/public/Footer'
 import type { Category, Link as LinkType } from '@/types/database'
 
+import { getSiteConfig } from '@/app/admin/actions'
+
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const config = await getSiteConfig()
 
   // Check if user is logged in
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,7 +41,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header isLoggedIn={isLoggedIn} />
+      <Header isLoggedIn={isLoggedIn} config={config} />
 
       <main className="main-content">
         <div className="content-container">

@@ -5,18 +5,30 @@ import { useTheme } from '@/components/providers/ThemeProvider'
 import { useState } from 'react'
 import { LoginModal } from '@/components/auth/LoginModal'
 
-export function Header({ isLoggedIn }: { isLoggedIn?: boolean }) {
+interface HeaderProps {
+    isLoggedIn?: boolean
+    config?: Record<string, string>
+}
+
+export function Header({ isLoggedIn, config = {} }: HeaderProps) {
     const { theme, toggleTheme } = useTheme()
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const { site_title, logo_url } = config
 
     return (
         <>
             <header className="site-header">
                 <Link href="/" className="site-header-logo">
-                    <div className="site-header-logo-icon">
-                        <span className="material-symbols-outlined icon-filled">bookmarks</span>
-                    </div>
-                    <h1 className="site-header-title">My Bookmarks</h1>
+                    {logo_url ? (
+                        <div className="relative h-10 w-auto aspect-square overflow-hidden rounded-lg">
+                            <img src={logo_url} alt="Logo" className="w-full h-full object-contain" />
+                        </div>
+                    ) : (
+                        <div className="site-header-logo-icon">
+                            <span className="material-symbols-outlined icon-filled">bookmarks</span>
+                        </div>
+                    )}
+                    <h1 className="site-header-title">{site_title || 'My Bookmarks'}</h1>
                 </Link>
                 <div className="site-header-actions">
                     <button

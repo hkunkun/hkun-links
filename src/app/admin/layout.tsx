@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient'
 
+import { getSiteConfig } from './actions'
+
 export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({
@@ -17,8 +19,10 @@ export default async function AdminLayout({
         redirect('/login?redirectTo=/admin')
     }
 
+    const config = await getSiteConfig()
+
     return (
-        <AdminLayoutClient user={user}>
+        <AdminLayoutClient user={user} config={config}>
             {children}
         </AdminLayoutClient>
     )

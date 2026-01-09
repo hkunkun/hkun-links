@@ -10,15 +10,23 @@ const manrope = Manrope({
   variable: '--font-manrope',
 })
 
-export const metadata: Metadata = {
-  title: "My Bookmarks",
-  description: "Curated collection of useful links and resources",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "My Bookmarks",
-  },
+import { getSiteConfig } from '@/app/admin/actions'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig()
+  const title = config.site_title || "My Bookmarks"
+
+  return {
+    title,
+    description: "Curated collection of useful links and resources",
+    manifest: "/manifest.json",
+    icons: config.favicon_url ? { icon: config.favicon_url } : undefined,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title,
+    },
+  }
 }
 
 export const viewport: Viewport = {

@@ -111,6 +111,20 @@ export interface Database {
                     ip_hash?: string | null
                 }
             }
+            site_config: {
+                Row: {
+                    key: string
+                    value: string
+                }
+                Insert: {
+                    key: string
+                    value: string
+                }
+                Update: {
+                    key?: string
+                    value?: string
+                }
+            }
         }
         Views: {
             [_ in never]: never
