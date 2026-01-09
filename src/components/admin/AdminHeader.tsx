@@ -2,12 +2,16 @@
 
 import { User } from '@supabase/supabase-js'
 
+import Link from 'next/link'
+import { useTheme } from '@/components/providers/ThemeProvider'
+
 interface AdminHeaderProps {
     user: User
     onMenuClick?: () => void
 }
 
 export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
+    const { theme, toggleTheme } = useTheme()
     return (
         <header className="admin-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -31,12 +35,22 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
 
                 {/* Action buttons */}
                 <div className="admin-header-icons">
-                    <button className="admin-icon-btn">
-                        <span className="material-symbols-outlined">notifications</span>
+                    <button
+                        onClick={toggleTheme}
+                        className="admin-icon-btn"
+                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                    >
+                        <span className="material-symbols-outlined">
+                            {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+                        </span>
                     </button>
-                    <button className="admin-icon-btn">
-                        <span className="material-symbols-outlined">help</span>
-                    </button>
+                    <Link
+                        href="/"
+                        className="admin-icon-btn"
+                        title="View Public Site"
+                    >
+                        <span className="material-symbols-outlined">home</span>
+                    </Link>
                 </div>
             </div>
         </header>
