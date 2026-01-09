@@ -665,7 +665,8 @@ body {
 }
 
 .dark .admin-header {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom-color: var(--color-border);
 }
 
 .admin-header-title {
@@ -2632,9 +2633,11 @@ body {
 .space-y-4>*+* {
   margin-top: 1rem !important;
 }
+
 /* Settings Page Form (Manual Override) */
 .settings-form-card {
-  background-color: var(--color-surface); /* Dark mode compatible */
+  background-color: var(--color-surface);
+  /* Dark mode compatible */
   padding: 1.5rem;
   border-radius: 0.75rem;
   border: 1px solid var(--color-border);
@@ -2645,5 +2648,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 42rem; /* max-w-2xl */
+  max-width: 42rem;
+  /* max-w-2xl */
 }
