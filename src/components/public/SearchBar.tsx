@@ -44,6 +44,7 @@ export function SearchBar({ initialValue = '', placeholder = 'Search links, tags
                     onKeyDown={handleKeyDown}
                     className="search-bar-input"
                     placeholder={placeholder}
+                    aria-label="Search queries"
                 />
 
             </label>

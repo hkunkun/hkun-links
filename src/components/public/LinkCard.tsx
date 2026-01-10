@@ -20,8 +20,6 @@ export function LinkCard({ link }: LinkCardProps) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ linkId: link.id }),
         }).catch(() => { })
-
-        window.open(link.url, '_blank', 'noopener,noreferrer')
     }
 
     const getDomain = (url: string) => {
@@ -33,7 +31,13 @@ export function LinkCard({ link }: LinkCardProps) {
     }
 
     return (
-        <button onClick={handleClick} className="link-card">
+        <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleClick}
+            className="link-card"
+        >
             <div className="link-card-icon">
                 {thumbnailUrl && !imgError ? (
                     <Image
@@ -55,7 +59,7 @@ export function LinkCard({ link }: LinkCardProps) {
             {link.is_favorite && (
                 <Star size={18} fill="#f59e0b" style={{ color: '#f59e0b' }} />
             )}
-        </button>
+        </a>
     )
 }
 
