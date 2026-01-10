@@ -3,6 +3,7 @@
 import type { Link as LinkType } from '@/types/database'
 import Image from 'next/image'
 import { useState } from 'react'
+import { Link2, Star } from 'lucide-react'
 
 interface LinkCardProps {
     link: LinkType
@@ -44,7 +45,7 @@ export function LinkCard({ link }: LinkCardProps) {
                         unoptimized
                     />
                 ) : (
-                    <span className="material-symbols-outlined" style={{ color: 'var(--color-text-muted)' }}>link</span>
+                    <Link2 size={20} style={{ color: 'var(--color-text-muted)' }} />
                 )}
             </div>
             <div className="link-card-content">
@@ -52,8 +53,9 @@ export function LinkCard({ link }: LinkCardProps) {
                 <div className="link-card-domain hidden md:block">{link.description || getDomain(link.url)}</div>
             </div>
             {link.is_favorite && (
-                <span className="material-symbols-outlined icon-filled" style={{ color: '#f59e0b' }}>star</span>
+                <Star size={18} fill="#f59e0b" style={{ color: '#f59e0b' }} />
             )}
         </button>
     )
 }
+

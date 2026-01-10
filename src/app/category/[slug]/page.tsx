@@ -61,7 +61,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <header className="category-page-header">
                 <div className="category-header-left">
                     <Link href="/" className="back-btn" aria-label="Back to home">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </Link>
                     <div className="h-6 w-px bg-[var(--color-border)]"></div>
                     <div className="category-page-title-row">

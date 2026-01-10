@@ -2,6 +2,7 @@
 
 import type { Category } from '@/types/database'
 import Link from 'next/link'
+import { Folder } from 'lucide-react'
 
 interface CategorySectionHeaderProps {
     category: Category
@@ -18,9 +19,7 @@ export function CategorySectionHeader({ category, linkCount, hideViewAll }: Cate
                 {isEmoji ? (
                     <span className="category-icon">{category.icon}</span>
                 ) : (
-                    <span className="material-symbols-outlined category-icon" style={{ color: 'var(--color-primary)' }}>
-                        {category.icon}
-                    </span>
+                    <Folder size={20} style={{ color: 'var(--color-primary)' }} className="category-icon" />
                 )}
                 {category.name}
             </h3>
@@ -32,3 +31,4 @@ export function CategorySectionHeader({ category, linkCount, hideViewAll }: Cate
         </div>
     )
 }
+

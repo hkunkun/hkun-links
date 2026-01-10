@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useTheme } from '@/components/providers/ThemeProvider'
 import { useState } from 'react'
 import { LoginModal } from '@/components/auth/LoginModal'
+import { Bookmark, Sun, Moon, LayoutDashboard, LogIn } from 'lucide-react'
 
 interface HeaderProps {
     isLoggedIn?: boolean
@@ -25,7 +26,7 @@ export function Header({ isLoggedIn, config = {} }: HeaderProps) {
                         </div>
                     ) : (
                         <div className="site-header-logo-icon">
-                            <span className="material-symbols-outlined icon-filled">bookmarks</span>
+                            <Bookmark size={24} fill="currentColor" />
                         </div>
                     )}
                     <h1 className="site-header-title">{site_title || 'My Bookmarks'}</h1>
@@ -36,13 +37,11 @@ export function Header({ isLoggedIn, config = {} }: HeaderProps) {
                         className="icon-button"
                         aria-label="Toggle theme"
                     >
-                        <span className="material-symbols-outlined">
-                            {theme === 'dark' ? 'light_mode' : 'dark_mode'}
-                        </span>
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
                     {isLoggedIn ? (
                         <Link href="/admin" className="icon-button" aria-label="Admin Dashboard" title="Admin Dashboard">
-                            <span className="material-symbols-outlined">dashboard</span>
+                            <LayoutDashboard size={20} />
                         </Link>
                     ) : (
                         <button
@@ -50,7 +49,7 @@ export function Header({ isLoggedIn, config = {} }: HeaderProps) {
                             className="login-btn"
                             style={{ width: 'auto', padding: '0 1rem', height: '2.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 0 }}
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
+                            <LogIn size={18} />
                             Login
                         </button>
                     )}
@@ -64,3 +63,4 @@ export function Header({ isLoggedIn, config = {} }: HeaderProps) {
         </>
     )
 }
+

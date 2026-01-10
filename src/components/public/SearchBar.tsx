@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { Search } from 'lucide-react'
 
 interface SearchBarProps {
     initialValue?: string
@@ -34,7 +35,7 @@ export function SearchBar({ initialValue = '', placeholder = 'Search links, tags
         <div className="search-container">
             <label className="search-bar">
                 <div className="search-bar-icon">
-                    <span className="material-symbols-outlined">search</span>
+                    <Search size={20} />
                 </div>
                 <input
                     type="text"
@@ -49,3 +50,4 @@ export function SearchBar({ initialValue = '', placeholder = 'Search links, tags
         </div>
     )
 }
+
